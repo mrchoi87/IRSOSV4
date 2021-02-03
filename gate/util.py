@@ -19,7 +19,7 @@ def getdefaultlogger():
 
     streamHandler = logging.StreamHandler()
     #mrchoi87
-    fileHandler = logging.FileHandler('./log')
+    fileHandler = logging.FileHandler('./irsos.log')
     #fileHandler = TimedRotatingFileHandler('./log', when='midnight', interval=1, encoding='utf-8')
 
     formatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')

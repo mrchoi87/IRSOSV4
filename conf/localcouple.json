@@ -1,1 +1,47 @@
-{"id":"c315cb82-0f6c-4ed6-b8cc-b00331789494","name":"Sample","children":[{"name":"시험온실#1","id":"4157859e-df55-48e5-b3ac-8e6288f2165e","ssmate":{"mod":"mate_farmos","class":"FarmosMate","opt":{"db":{"host":"localhost","user":"farmos","password":"farmosv2@","db":"farmos"},"conn":{"host":"localhost","port":1883,"keepalive":60},"mqtt":{"svc":"cvtgate","id":"4157859e-df55-48e5-b3ac-8e6288f2165e"}}},"dsmate":{"mod":"mate_ksx3267v2","class":"KSX3267MateV2","opt":{"conn":[{"method":"rtu","port":"/dev/ttyACM0","baudrate":9600,"timeout":5},{"method":"rtu","port":"/dev/ttyUSB0","baudrate":9600,"timeout":5}],"sleep":{"time":3,"obs":10,"noti":2}}},"children":[{"id":"USB0","dt":"gw","dk":"USB0","opt":{},"children":[{"id":"123","dk":"[2,201,[\"opid\",\"status\"],501,[\"operation\",\"opid\"]]","dt":"nd","children":[{"id":"124","dk":"[2,203,[\"opid\",\"status\",\"remain-time\"],503,[\"operation\",\"opid\",\"hold-time\"]]","dt":"act/switch/level1","children":[]},{"id":"125","dk":"[2,207,[\"opid\",\"status\",\"remain-time\"],507,[\"operation\",\"opid\",\"hold-time\"]]","dt":"act/switch/level1","children":[]},{"id":"126","dk":"[2,267,[\"opid\",\"status\",\"remain-time\"],567,[\"operation\",\"opid\",\"time\"]]","dt":"act/retractable/level1","children":[]},{"id":"127","dk":"[2,271,[\"opid\",\"status\",\"remain-time\"],571,[\"operation\",\"opid\",\"time\"]]","dt":"act/retractable/level1","children":[]}]}]}]}]}
+{
+  "id": "c315cb82-0f6c-4ed6-b8cc-b00331789494",
+  "name": "Sample",
+  "children": [{
+    "name": "시험온실#1",
+    "id": "4157859e-df55-48e5-b3ac-8e6288f2165e",
+    "ssmate": {
+      "mod": "mate_farmos",
+      "class": "FarmosMate",
+      "opt": {
+        "db": {
+          "host": "localhost",
+          "user": "farmos",
+          "password": "farmosv2@",
+          "db": "farmos"
+        },
+        "conn": {
+          "host": "localhost",
+          "port": 1883,
+          "keepalive": 60
+        },
+        "mqtt": {
+          "svc": "cvtgate",
+          "id": "4157859e-df55-48e5-b3ac-8e6288f2165e"
+        }
+      }
+    },
+    "dsmate": {
+      "mod": "mate_ksx3267v2",
+      "class": "KSX3267MateV2",
+      "opt": {
+        "conn": [{
+          "method": "rtu",
+          "port": "/dev/ttyUSB0",
+          "baudrate": 9600,
+          "timeout": 5
+        }],
+        "sleep": {
+          "time": 3,
+          "obs": 10,
+          "noti": 2
+        }
+      }
+    },
+    "children": []
+  }]
+}

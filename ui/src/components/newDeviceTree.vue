@@ -292,7 +292,6 @@ import JsonEditor from '@/components/JsonEditor'
 import { Multipane, MultipaneResizer } from 'vue-multipane'
 import { mapGetters } from 'vuex'
 
-
 export default {
   components: {
     Multipane,
@@ -414,16 +413,15 @@ export default {
         let specCodeList = new Set([])
         gateList.forEach(gate => {
           for (const nodeId in gate.node) {
-            specCodeList.add(
-              `${gate.node[nodeId].compcode}/${gate.node[nodeId].nodecode}`
-            )
+            specCodeList.add(`${gate.node[nodeId].compcode}/${gate.node[nodeId].nodecode}`)
+            console.log(gate.node[nodeId])
           }
         })
 
         let searchCodePrmise = []
         for (let item of specCodeList) {
           searchCodePrmise.push(
-            this.getDevSpec(item.split('/')[0], item.split('/')[1], 'nd', 2)
+            this.getDevSpec(item.split('/')[0], item.split('/')[1], 'nd')
           )
         }
 
@@ -468,7 +466,7 @@ export default {
               node.devcodes
             ) {
               for (let devcode of node.devcodes) {
-                specCodeList.add(`${node.compcode}/${devcode}`)
+                specCodeList.add(`${node.compcode}/${devcode}/${node.nodecode}`)
               }
             }
           }
@@ -476,8 +474,15 @@ export default {
 
         searchCodePrmise = []
         for (let item of specCodeList) {
+
+          const temp = item.split('/')
+
+          if (temp[1] == '0') {
+            continue
+          }
+
           searchCodePrmise.push(
-            this.getDevSpec(item.split('/')[0], item.split('/')[1], 'dev', 2)
+            this.getDevSpec(temp[0], temp[1], 'dev')
           )
         }
 
@@ -602,18 +607,14 @@ export default {
         .concat(this.$refs.tree.getCheckedNodes())
       return this._.cloneDeep(device)
     },
-    getDevSpec (compcode, devcode, type, ndtype) {
-      //mrchoi87 add ndtype
-      let specIP = commonSpecIp
-      //let specIP = 'http://192.168.1.153:3000/api'
-      //return default_sepc
-
-      const temp =  this.axios.get(specIP, {
+    getDevSpec (compcode, devcode, type) {
+      //let specIP = commonSpecIp
+      let specIP = 'http://192.168.1.153:3000/api'
+      const temp = this.axios.get(specIP, {
         params: {
           compcode: compcode,
           code: devcode,
-          devtype: type,
-          ndtype: ndtype
+          devtype: type
         }
       })
 
