@@ -114,7 +114,7 @@ class KSX3267MateV2(ThreadMate):
             print "read register", unit, addr, count
 
             #mrchoi87
-            self._logger.info("read register: " + str(unit) + " " + str(addr) + " " + str(count))
+            self._logger.info("read_holding_registers: " + str(unit) + " " + str(addr) + " " + str(count))
 
             try:
                 return conn.read_holding_registers(addr, count, unit=unit)
@@ -358,6 +358,7 @@ class KSX3267MateV2(ThreadMate):
         with self._lock:
             time.sleep(KSX3267MateV2._SLEEP)
             print "....... lock for write", self.getdk(dev, 3), registers
+            #self._logger.info("sters: " + self.getdk(dev, 3) + " " + registers + " " + unit)
             res = self._conn[gw["dk"]].write_registers(self.getdk(dev, 3), registers, unit=unit)
 
         if res.isError():

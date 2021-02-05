@@ -610,11 +610,13 @@ export default {
     getDevSpec (compcode, devcode, type) {
       //let specIP = commonSpecIp
       let specIP = 'http://192.168.1.153:3000/api'
+
+
       const temp = this.axios.get(specIP, {
         params: {
           compcode: compcode,
           code: devcode,
-          devtype: type
+          devtype: type,        
         }
       })
 

@@ -333,11 +333,9 @@ export default {
       if (this.getAllFieldDevices && this.getAllFieldDevices[this.id]) {
         item = this.getAllFieldDevices[this.id]
       }
-
       for (const device of item) {
         this.$set(device, 'roll', true)
       }
-
       if (item.length > 0) {
         this.historyDataMaker(item)
         this.controlDataMaker(item)
@@ -345,19 +343,16 @@ export default {
       }
       return item
     },
-
     getNutrientSupply() {
       let item = []
       if (this.getDevices) {
         item = this.getDevices.filter(device => {
           return device.spec.Class === 'nutrient-supply'
         })
-
         for (const device of item) {
           this.$set(device, 'roll', true)
         }
       }
-
       if (item.length > 0) {
         this.historyDataMaker(item)
         this.controlDataMaker(item)
@@ -441,7 +436,6 @@ export default {
           date: this.$date().format(date, 'YYYY-MM-DD')
         }
       })
-
       this.$set(this.history[deivceId], 'requests', data.requests)
       this.$set(this.history[deivceId], 'states', data.states)
     },
@@ -509,7 +503,6 @@ export default {
           control: value
         }
       )
-
       if (!result) {
         this.$notify({
           title: '실패',
@@ -551,8 +544,6 @@ export default {
           return
         }
       }
-
-
       let result = this.mqtt.deivceControl(
         device,
         control,
@@ -566,8 +557,6 @@ export default {
         })
       }
     }
-
-
   }
 }
 </script>
