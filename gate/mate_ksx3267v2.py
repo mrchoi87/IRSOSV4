@@ -63,7 +63,7 @@ class KSX3267MateV2(ThreadMate):
         self._logger.info("KSX3267MateV2 Started.")
 
     def detect_node(self, conn, unit, registers):
-        print "detect_node", unit, registers
+        #print "detect_node", unit, registers
         compcode = registers[0]
         nodecode = registers[2]
         size = registers[4]
@@ -72,7 +72,7 @@ class KSX3267MateV2(ThreadMate):
             res = self.readregister(conn, KSX3267MateV2._DEVCODEREG, size, unit)
 
             if res is None or res.isError():
-                self._logger.warn("Fail to get devices from " + str(unit) + " " + str(res))
+                #self._logger.warn("Fail to get devices from " + str(unit) + " " + str(res))
                 return None
 
             if len(res.registers) != size:
@@ -111,7 +111,7 @@ class KSX3267MateV2(ThreadMate):
         print "....... before lock for read"
         with self._lock:
             time.sleep(KSX3267MateV2._SLEEP)
-            print "read register", unit, addr, count
+            #print "read register", unit, addr, count
 
             #mrchoi87
             self._logger.info("read_holding_registers: " + str(unit) + " " + str(addr) + " " + str(count))
@@ -180,13 +180,13 @@ class KSX3267MateV2(ThreadMate):
             elif res.registers[1] in (NodeType.SENNODE, NodeType.ACTNODE, NodeType.INTNODE): # device type
                 if res.registers[3] == ProtoVer.KS_X_3267_2018 or res.registers[3] == ProtoVer.KS_X_3267_2018_v1:
                     info = self.detect_node(conn, unit, res.registers)
-                    self._logger.info ("Found a node : " + str(unit) + " " + str(info))
+                    #self._logger.info ("Found a node : " + str(unit) + " " + str(info))
                 else:
                     noti = Notice(None, NotiCode.DETECT_UNKNOWN_PROTOCOL_VER, devid=tempid) # unknown protocol version
             elif res.registers[1] == NodeType.NUTNODE:
                 if res.registers[3] == ProtoVer.TTA_1:
                     info = self.detect_node(conn, unit, res.registers)
-                    self._logger.info ("Found a nutrient system : " + str(unit) + " " + str(info))
+                    #self._logger.info ("Found a nutrient system : " + str(unit) + " " + str(info))
                 else:
                     noti = Notice(None, NotiCode.DETECT_UNKNOWN_PROTOCOL_VER, devid=tempid) # unknown protocol version
             else:
@@ -355,11 +355,24 @@ class KSX3267MateV2(ThreadMate):
             #    return ResCode.FAIL_WRONG_KEYWORD
 
         print "....... befor lock for write"
+
+        self._logger.info("write_registers: ")
+        self._logger.info("write_registers: dev[3] " + str(self.getdk(dev, 3)))
+        self._logger.info("write_registers: registers " + str(registers))
+        #self._logger.info("write_registers: unit" + str(unit=unit))
+
         with self._lock:
-            time.sleep(KSX3267MateV2._SLEEP)
-            print "....... lock for write", self.getdk(dev, 3), registers
-            #self._logger.info("sters: " + self.getdk(dev, 3) + " " + registers + " " + unit)
+            #time.sleep(KSX3267MateV2._SLEEP)
+            time.sleep(1)
+            #print "....... lock for write", self.getdk(dev, 3), registers
+
+            #temp1 = self.getdk(dev, 3)
+            #temp2 = registers
+            #temp3 = unit
+            #self._logger.info("write_registers: ")
+            #self._logger.info("write_registers: " + self.getdk(dev, 3) + " " + registers + " " + unit)
             res = self._conn[gw["dk"]].write_registers(self.getdk(dev, 3), registers, unit=unit)
+            #res = self._conn[gw["dk"]].write_registers(temp1, temp2, temp3)
 
         if res.isError():
             self._logger.warn("Fail to write a request to dev." + str(dev) + "," + str(res) + ":" + str(request))
@@ -573,7 +586,7 @@ if __name__ == "__main__":
     opt = {
         'conn' : [{
             'method': 'rtu',
-            'port' : '/dev/ttyJND2',
+            'port' : '/dev/ttyUSB0',
             'baudrate' : 9600,
             'timeout': 5
         }]
@@ -597,7 +610,7 @@ if __name__ == "__main__":
         ]}
     ]
     devinfo = [{
-        "id" : "1", "dk" : "JND2", "dt": "gw", "children" : [
+        "id" : "1", "dk" : "USB0", "dt": "gw", "children" : [
 #            {
 #            "id" : "101", "dk" : '[1,201,["status"],301,["operation","opid"]]', "dt": "nd", "children" : [
 #{"id" : "102", "dk" : '[1,210,["value","status"]]', "dt": "sen"},

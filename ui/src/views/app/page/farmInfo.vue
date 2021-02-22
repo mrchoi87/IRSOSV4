@@ -46,6 +46,7 @@ export default {
   computed: {
     ...mapGetters({
       getFields: 'field/getFields'
+      
     })
   },
   data () {

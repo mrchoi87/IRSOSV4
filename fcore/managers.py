@@ -96,7 +96,7 @@ class TimeSpanManager(Manager):
 
     def updatetimespans(self):
         if self._day == time.localtime(time.time()).tm_yday:
-            return 
+            return
 
         # It needs to recalculate once a day.
         self._day = time.localtime(time.time()).tm_yday
@@ -112,12 +112,12 @@ class TimeSpanManager(Manager):
             for p in timespan["parts"]:
                 p["to"] = int(p["to"])
 
-        else: 
+        else:
             self._logger.warn("Unknown timing : " + str([tsid, fldid, timespan["configuration"]["timing"]]))
 
         timespan["tvar"] = {"tsidx": Variable(0)}
         for th in timespan["threshold"]:
-            timespan["tvar"]["#" + th["id"]] = Variable() 
+            timespan["tvar"]["#" + th["id"]] = Variable()
 
     def loadtimespan(self, updated):
         query = "select * from core_timespan where unix_timestamp(updated) > %s and field_id in (select id from fields where deleted = 0)"
@@ -238,7 +238,7 @@ class RuleManager(Manager):
 
         found = self.getpriorityfromruleset(ruleid)
         if found >= 0: # should be deleted from ruleset
-            del self._rule[found][ruleid]
+            del self._rules[found][ruleid]
 
         if rule["used"] > 0 and rule["deleted"] == 0:
             priority = rule["inputs"]["priority"].getvalue()
@@ -284,7 +284,7 @@ class RuleManager(Manager):
 
         if "period" not in kv:
             kv["period"] = Variable(RuleManager._DEF_PERIOD)
-            
+
         if row["inputs"] is not None:
             inputs = json.loads(row["inputs"])
             for datum in inputs:
@@ -298,6 +298,10 @@ class RuleManager(Manager):
             kid[key] = did
 
         print "rule inputs", kv
+        #mrchoi87
+        self._logger.info(str(kv))
+        self._logger.info(str(kid))
+
 
         ctrls = json.loads(row["controllers"])
         for proc in ctrls['processors']:
@@ -321,7 +325,7 @@ class RuleManager(Manager):
     def setinputdata(self, rule):
         for key, did in rule["_inputs"].iteritems():
             rule["inputs"][key] = self._data.getdata(did)
-        
+
     def processrules(self):
         ret = []
         now = int(time.time())
@@ -367,7 +371,7 @@ class RuleManager(Manager):
         ret = []
         if "data" not in outputs:
             return ret
-        for out in outputs["data"]: 
+        for out in outputs["data"]:
             dataid = self.getdataid(ruleid, out["outcode"])
             ret.append([dataid, out["outputs"]])
         return ret
@@ -379,9 +383,9 @@ class RuleManager(Manager):
                 self._data.updatedata(dataid, ret[idx].getretcode().value)
 
         if "data" not in rule["outputs"]:
-            return 
+            return
 
-        for out in rule["outputs"]["data"]: 
+        for out in rule["outputs"]["data"]:
             dataid = self.getdataid(rule["id"], out["outcode"])
             var = newret[out["outputs"]]
             if var is None:
@@ -393,10 +397,16 @@ class RuleManager(Manager):
     def sendrequest(self, dev, cmd, params):
         print "send req", dev["id"], cmd, params
         if dev and "nodeid" in dev and dev["nodeid"]:
-            req = Request(dev["nodeid"]) 
+            req = Request(dev["nodeid"])
             req.setcommand(dev["id"], cmd, params)
             topic = "/".join(["cvtgate", dev["coupleid"], str(dev["gateid"]), "req", str(dev["nodeid"])])
             ret = publish.single(topic, payload=req.stringify(), qos=2, hostname=self._option["mqtt"]["host"])
+            #mrchoi87
+            self._logger.info("mqtt ")
+            self._logger.info(str(ret))
+            self._logger.info(str(topic))
+            self._logger.info(str(req.stringify()))
+
             print "mqtt", ret, topic, req.stringify()
             return req
         else:
@@ -405,7 +415,7 @@ class RuleManager(Manager):
 
     def processrequest(self, rule, ret, newret):
         if "req" not in rule["outputs"]:
-            return 
+            return
 
         reqs = []
         for out in rule["outputs"]["req"]:
@@ -465,6 +475,8 @@ class RuleManager(Manager):
                     tmp.setretcode(RetCode.TRIGGER_NOT_ACTIVATED)
                     self._logger.info(rule["name"] + " trigger is not activated.")
                     return tmp             # trigger is not activated
+                #mrchoi87
+                self._logger.info(rule["name"] + " trigger is successd : " + str(tmp.getretcode()))
 
             except Exception as ex:
                 self._logger.warn(rule["name"] + " trigger is failed to execute. " + str(ex))
@@ -472,7 +484,7 @@ class RuleManager(Manager):
                 return ProcResult(RetCode.PROCESSOR_EXECEPTION) # trigger is failed to execute
 
             ret = [tmp]
-        
+
         for idx in range(len(ctrl["processors"])):
             try:
                 proc = ctrl["processors"][idx]
@@ -483,7 +495,7 @@ class RuleManager(Manager):
             except Exception as ex:
                 self._logger.warn(rule["name"] + " (" + str(idx) + ") is failed to execute. " + str(ex))
                 self._logger.warn(str(traceback.format_exc()))
-                tmp = ProcResult(RetCode.PROCESSOR_EXCEPTION) 
+                tmp = ProcResult(RetCode.PROCESSOR_EXCEPTION)
 
             ret.append(tmp)
 
@@ -503,6 +515,6 @@ if __name__ == '__main__':
     now = datetime.now()
     nsec = (now - now.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds()
     ans = 0 if nsec < 10000 else -1
-    assert ts.getcurrentts((1, 1)) == ans, "timespan is not matched #2" 
+    assert ts.getcurrentts((1, 1)) == ans, "timespan is not matched #2"
 
     rulemng = RuleManager({}, util.getdefaultlogger())

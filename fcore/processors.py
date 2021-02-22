@@ -12,7 +12,7 @@ import subprocess32
 import importlib
 from simpleeval import simple_eval
 
-import util 
+import util
 from result import RetCode, ProcResult
 
 class Processor(object):
@@ -33,7 +33,7 @@ class Processor(object):
     def evaluate(self, rule, proc):
         """
         개별 processsor 를 평가하기위한 메소드
-        :param rule: 룰 
+        :param rule: 룰
         :param proc: 실행할 프로세서
         """
         pass
@@ -42,7 +42,7 @@ class ModuleProcessor(Processor):
     """
     기 구현된 모듈을 사용하여 평가하는 프로세서
     외부 모듈은 (RetCode, [result1, result2, ...]) 의 형식으로 리턴해야한다.
-    result1, result2... 는 모듈을 실행한 결과물이고, 이는 순서대로 outputs에 매칭된다. 
+    result1, result2... 는 모듈을 실행한 결과물이고, 이는 순서대로 outputs에 매칭된다.
     outputs에 매칭되지 않는 값들은 룰에서 사용되지는 않지만 모듈의 다음 계산을 위해 사용될 임시값으로 간주한다.
     """
     def __init__(self, logger):
@@ -81,15 +81,19 @@ class EquationProcessor(Processor):
                 values.append (simple_eval(eq, names=self.namehandler, functions={"exp":f_exp, "log":f_log}))
         else:
             values.append (simple_eval(proc["eq"], names=self.namehandler, functions={"exp":f_exp, "log":f_log}))
-        
+
+        self._logger.info(str(proc["eq"]))
+        self._logger.info(str(values))
+
         print proc["eq"], "evaluated.", values
+
         return ProcResult(RetCode.OK, proc, values)
 
     def namehandler(self, node):
         print "#" + node.id, self._tmpdata["#" + node.id].gettsvalue(self._tsidx)
         return self._tmpdata["#" + node.id].gettsvalue(self._tsidx)
 
-class ExternalProcessor(Processor): 
+class ExternalProcessor(Processor):
     """
     외부 프로세스를 실행하여 평가하는 프로세서
     외부 프로세스에 대한 최대 실행시간은 5초를 초과할 수 없다.
@@ -109,7 +113,7 @@ class ExternalProcessor(Processor):
         return args
 
     def evaluate(self, rule, proc, dbcur):
-    	lines = subprocess32.check_output(self._makeargs(proc, rule["inputs"]), 
+    	lines = subprocess32.check_output(self._makeargs(proc, rule["inputs"]),
         	timeout=self._TIMEOUT, universal_newlines=True)
         values = map(float, lines.split("\n"))
 
@@ -117,7 +121,7 @@ class ExternalProcessor(Processor):
 
 if __name__ == '__main__':
     eqproc = EquationProcessor(util.getdefaultlogger())
-    print eqproc.evaluate({"field_id" : 1, "inputs": {"#bottomtemp0" : {"nvalue" : 0}, "#middletemp0": {"nvalue" : 0}, "#uptemp0": {"nvalue" : 0}, "#alc0" : {"nvalue" : 0}}}, {"type" : "eq", "eq": "0 if bottomtemp0 != 0 and middletemp0 != 0 else 1"}) 
+    print eqproc.evaluate({"field_id" : 1, "inputs": {"#bottomtemp0" : {"nvalue" : 0}, "#middletemp0": {"nvalue" : 0}, "#uptemp0": {"nvalue" : 0}, "#alc0" : {"nvalue" : 0}}}, {"type" : "eq", "eq": "0 if bottomtemp0 != 0 and middletemp0 != 0 else 1"})
 
     mdproc = ModuleProcessor(util.getdefaultlogger())
     print mdproc.evaluate({"field_id" : 1, "inputs": {"#bottomtemp1" : {"nvalue" : 10},
