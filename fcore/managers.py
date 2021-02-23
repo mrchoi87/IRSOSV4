@@ -401,6 +401,7 @@ class RuleManager(Manager):
             req.setcommand(dev["id"], cmd, params)
             topic = "/".join(["cvtgate", dev["coupleid"], str(dev["gateid"]), "req", str(dev["nodeid"])])
             ret = publish.single(topic, payload=req.stringify(), qos=2, hostname=self._option["mqtt"]["host"])
+
             #mrchoi87
             self._logger.info("mqtt ")
             self._logger.info(str(ret))

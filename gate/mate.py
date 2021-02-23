@@ -110,7 +110,6 @@ class Mate(object):
 
     def readmsg(self):
         """ Mate가 메세지를 읽는 함수. 직접구현해야함.  """
-        self._logger.warn("mate.py -> readmsg()")
         self._msgq = [MBlock(0, BlkType.NONE, None)]
 
     def backup(self, blk):
@@ -132,8 +131,12 @@ class Mate(object):
         """ 노티를 전송한다. writecb를 사용함. """
         pass
 
+    def doextra(self):
+        print("doextra-Mate", type(self).__name__)
+        pass
+
     def run(self):
-        print "mate run ... sleep : ", self._sleep["time"]
+        print ("mate run ... sleep : ", self._sleep["time"])
         scnt = 0
         while self.isexecuting():
             try:
@@ -145,12 +148,12 @@ class Mate(object):
                         self._logger.info("reconnected!!")
 
                 if self.isexecuting() == False:
+                    self._logger.info("finish to execute!!")
                     break
 
                 time.sleep(self._sleep["time"])
-                #mrchoi87
-                self._logger.warn("mate.py -> run()")
                 self.readmsg()
+                self.doextra()
 
                 if scnt % self._sleep["obs"] == 0:
                     self.sendobs()
@@ -166,7 +169,7 @@ class Mate(object):
                 except:
                     pass
 
-        print "mate stop"
+        print ("mate stop")
 
 class ThreadMate(Mate):
     def __init__(self, option, devinfo, coupleid, logger=None):
@@ -190,11 +193,10 @@ class ThreadMate(Mate):
         return True
 
 if __name__ == "__main__":
-    mate = ThreadMate({}, [])
-    mate2 = Mate({}, [])
-    mate2
+    mate = ThreadMate({}, [], '1', None)
+    mate2 = Mate({}, [], '1', None)
     mate.start(mate2.writeblk)
-    print "mate started"
+    print ("mate started")
     time.sleep(3)
     mate.stop()
-    print "mate stopped"
+    print ("mate stopped")

@@ -4,7 +4,7 @@
 # Copyright (c) 2019 JiNong, Inc.
 # All right reserved.
 #
-# mate for interaction with farmos 
+# mate for interaction with farmos
 
 import json
 import sys
@@ -39,9 +39,9 @@ class FarmosDB:
     _REQUPS_QUERY = "update requests set status = %s, exectime = now() where opid = %s "
     _REQFIN_QUERY = "update requests set finishtime = now() where device_id = %s and opid = %s "
     _CODESET = {
-        "status" : 0, 
+        "status" : 0,
         "value" : 1,
-        "position" : 2, 
+        "position" : 2,
         "state-hold-time" : 3,
         "remain-time": 4,
         "ratio" : 5,
@@ -58,6 +58,7 @@ class FarmosDB:
         self._devinfo = devinfo
         self._logger = logging.getLogger('farmos') if logger is None else logger
         self._lastopid = {}
+        self._isconnected = False
 
     def start(self):
         pass
@@ -67,8 +68,10 @@ class FarmosDB:
         self._conn = pymysql.connect(host=copt["host"], user=copt["user"],
                                      password=copt["password"], db=copt["db"])
         self._cur = self._conn.cursor()
+        self._isconnected = True
 
     def close(self):
+        self._isconnected = False
         self._cur.close()
         self._conn.close()
 
@@ -83,6 +86,8 @@ class FarmosDB:
         print FarmosDB._CUROBS_QUERY, params
         with self._lock:
             try:
+                if self._isconnected is False:
+                    self.connect()
                 self._cur.execute(FarmosDB._CUROBS_QUERY, params)
                 self._cur.execute(FarmosDB._OBS_QUERY, params)
                 self._conn.commit()
@@ -90,7 +95,6 @@ class FarmosDB:
                 self._logger.warn("DB exception : " + str(ex))
                 try:
                     self.close()
-                    self.connect()
                 except Exception as ex:
                     self._logger.warn("DB exception : " + str(ex))
 
@@ -113,7 +117,7 @@ class FarmosDB:
             dev = self._devinfo.finddevbyid(devid)
             if dev is None:
                 self._logger.warn("There is no device : " + str(devid))
-                continue 
+                continue
 
             if DevType.issensor(dev["dt"]):
                 vdid = self.getdataid(devid, "value")
@@ -136,8 +140,13 @@ class FarmosDB:
                 if did in self._lastopid and "status" in noti:
                     print "lastopid ready", self._lastopid[did], noti["status"]
                     if noti["status"] == 0:
-                        print FarmosDB._REQFIN_QUERY, [devid, self._lastopid[did]]
-                        self._cur.execute(FarmosDB._REQFIN_QUERY, [devid, self._lastopid[did]])
+                        try:
+                            if self._isconnected is False:
+                                self.connect()
+                            print FarmosDB._REQFIN_QUERY, [devid, self._lastopid[did]]
+                            self._cur.execute(FarmosDB._REQFIN_QUERY, [devid, self._lastopid[did]])
+                        except Exception as ex:
+                            self._logger.warn("DB exception : " + str(ex))
                         del self._lastopid[did]
 
                 for key, value in noti.iteritems():
@@ -165,11 +174,13 @@ class FarmosDB:
                 if "param" not in content:
                     self._logger.warn("Request needs 'param' " + blk.stringify())
                     return False
-                
+
                 params = [content["opid"], content["id"], content["cmd"], json.dumps(content["param"])]
                 print "insert req", FarmosDB._REQINS_QUERY, params
                 with self._lock:
                     try:
+                        if self._isconnected is False:
+                            self.connect()
                         did = int(content["id"])
                         if did in self._lastopid:
                             print FarmosDB._REQFIN_QUERY, [did, self._lastopid[did]]
@@ -182,7 +193,6 @@ class FarmosDB:
                     except Exception as ex:
                         self._logger.warn("DB exception : " + str(ex))
                         self.close()
-                        self.connect()
 
         elif BlkType.isresponse(blk.gettype()):
             print "write res"
@@ -193,12 +203,13 @@ class FarmosDB:
             print FarmosDB._REQUPS_QUERY, params
             with self._lock:
                 try:
+                    if self._isconnected is False:
+                        self.connect()
                     self._cur.execute(FarmosDB._REQUPS_QUERY, params)
                     self._conn.commit()
                 except Exception as ex:
                     self._logger.warn("DB exception : " + str(ex))
                     self.close()
-                    self.connect()
 
         elif BlkType.isnotice(blk.gettype()):
             print "write noti"
@@ -217,7 +228,7 @@ class FarmosDB:
 
 if __name__ == "__main__":
     option = {"conn" : {"host" : "localhost", "user" : "root", "password" : "pass", "db" : "db"}}
-    devinfo = [{"id" : "2", "dk" : "1", "dt": "gw", "children" : [ 
+    devinfo = [{"id" : "2", "dk" : "1", "dt": "gw", "children" : [
       {"id" : "3", "dk" : "1", "dt": "nd", "children" : [
         {"id" : "4", "dk" : "0", "dt": "sen"},
         {"id" : "5", "dk" : "1", "dt": "act"}
@@ -225,7 +236,7 @@ if __name__ == "__main__":
     ]}]
     rrw = FarmosDB(option, devinfo, None)
     mate = Mate({}, [], None)
-    rrw.start(mate.writeblk)
+    rrw.start()
 
     time.sleep(3)
     rrw.stop()

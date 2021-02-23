@@ -13,7 +13,7 @@ import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
 from threading import Lock
 from mate import Mate
-from mblock import MBlock, BlkType, ResCode, StatCode, Request, Observation, NotiCode 
+from mblock import MBlock, BlkType, ResCode, StatCode, Request, Observation, NotiCode
 from dinfo import DevInfo
 
 '''
@@ -84,6 +84,7 @@ class JNMQTT:
         self.nodesubscribe(JNMQTT._REQ, 2)
 
         self._client.loop_start()
+        self._logger.info("Connected with mqtt server.")
 
     def close(self):
         pass
@@ -149,7 +150,7 @@ class JNMQTT:
         if msg is None:
             self._logger.info("Fail to parse a message. " + str(blk.payload))
             return msg
-            
+
         if tmp[3] == JNMQTT._REQ and BlkType.isrequest(msg.gettype()):
             return msg
         if tmp[3] == JNMQTT._RES and BlkType.isresponse(msg.gettype()):
