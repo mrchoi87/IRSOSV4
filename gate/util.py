@@ -13,21 +13,12 @@ import time
 import logging
 import logging.handlers
 
+
 def getdefaultlogger():
     _logger = logging.getLogger('mate')
     _logger.setLevel(logging.DEBUG)
-
     streamHandler = logging.StreamHandler()
-    #mrchoi87
-    fileHandler = logging.FileHandler('./irsos.log')
-    #fileHandler = TimedRotatingFileHandler('./log', when='midnight', interval=1, encoding='utf-8')
-
     formatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
-
     streamHandler.setFormatter(formatter)
-    fileHandler.setFormatter(formatter)
-
     _logger.addHandler(streamHandler)
-    _logger.addHandler(fileHandler)
-
     return _logger
